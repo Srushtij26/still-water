@@ -58,13 +58,17 @@ function initAudio(){
   for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5)}
   verb=AC.createConvolver();verb.buffer=buf;
   const vg=AC.createGain();vg.gain.value=.55;verb.connect(vg);vg.connect(master);
-  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=420;f.connect(master);f.connect(verb);
-  [110,164.8,220.4,277.2].forEach((fr,i)=>{
-    const o=AC.createOscillator(),g=AC.createGain(),l=AC.createOscillator(),lg=AC.createGain();
-    o.type='sine';o.frequency.value=PAL[pi].dr[i%PAL[pi].dr.length];g.gain.value=.035;
-    l.frequency.value=.05+i*.03;lg.gain.value=.02;l.connect(lg);lg.connect(g.gain);
-    o.connect(g);g.connect(f);o.start();l.start();drn.push(o);
-  });
+}
+let padT=0;
+function pad(){
+  if(!AC||!soundOn)return;
+  const P=PAL[pi],S=P.sc,t=AC.currentTime;
+  [0,2,4].forEach((k,j)=>{
+    const fr=P.root*Math.pow(2,S[(k+Math.floor(Math.random()*2))%S.length]/12)*(j===2?2:1);
+    const o=AC.createOscillator(),g=AC.createGain(),p=AC.createStereoPanner();
+    o.type='sine';o.frequency.value=fr;p.pan.value=(j-1)*.5;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.03,t+5);g.gain.linearRampToValueAtTime(0,t+11);
+    o.connect(g);g.connect(p);p.connect(master);p.connect(verb);o.start(t);o.stop(t+11.5)});
 }
 function tuneDrone(){const d=PAL[pi].dr;drn.forEach((o,i)=>o.frequency.setTargetAtTime(d[i%d.length],AC.currentTime,2))}
 let rainG;
@@ -233,6 +237,7 @@ function frame(now){
     drops.forEach(d=>{d.y+=800*dt;d.x-=60*dt;if(d.y>H){d.y=-30;d.x=Math.random()*W;if(Math.random()<.3&&ripples.length<70)ripples.push({x:Math.random()*W,y:Math.random()*H,r:0,age:0,max:45})}ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+2,d.y-14)});ctx.stroke()}
   if(breathe)drawBreath(T);
   // gentle rain of single drops when left alone
+  padT-=dt;if(padT<0&&AC){padT=14+Math.random()*8;pad()}
   mel-=dt;if(mel<0&&AC&&idle>2){mel=(3+Math.random()*5)*P.tm;drop(60+Math.random()*(W-120),60+Math.random()*(H-120),.35,.8)}
   requestAnimationFrame(frame);
 }
