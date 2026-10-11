@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Still Water</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;background:#16303d;overflow:hidden;font-family:Georgia,'Times New Roman',serif;color:#eaf4f1}
+#hud{position:fixed;left:16px;top:calc(env(safe-area-inset-top,0px) + 14px);font-style:italic;font-size:16px;opacity:.6;pointer-events:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#intro{position:fixed;left:0;right:0;top:34%;text-align:center;pointer-events:none;transition:opacity 2.5s ease;padding:0 24px}
+#intro h1{font-weight:400;font-size:clamp(34px,7vw,64px);letter-spacing:.04em;margin:0 0 10px;font-style:italic}
+#intro p{margin:0;font-size:17px;opacity:.75;line-height:1.6}
+#bar{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 12px;opacity:.55;transition:opacity .4s}
+#bar:hover,#bar:focus-within{opacity:1}
+button{font:inherit;font-size:15px;color:#eaf4f1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(6px)}
+button:hover{background:rgba(255,255,255,.2)}
+button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+button[aria-pressed="true"]{background:rgba(255,255,255,.28)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+<div id="intro"><h1>Still Water</h1><p>Touch the water. Drag slowly.<br>Let the fish come to you.</p></div>
+<div id="bar">
+  <button id="snd" aria-pressed="true">Sound on</button>
+  <button id="pal">Spring</button>
+  <button id="br" aria-pressed="false">Breathe</button>
+  <button id="rn" aria-pressed="false">Rain</button>
+  <button id="fd" aria-pressed="false">Feed</button>
+  <button id="nt">Day / night</button>
+</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H;
+function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;
